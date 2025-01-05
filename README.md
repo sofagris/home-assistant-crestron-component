@@ -1,3 +1,9 @@
+# Note
+
+Some entities are now broken since 2025.01. I will fix them soon.
+
+Until then, only fix is to downgrade.
+
 # Credit
 
 Fork based on the great work by npope@, all credit to the original author. Please refer to the original README for more details on how to use this.
