@@ -1,8 +1,10 @@
 # Note
 
-Some entities are now broken since 2025.01. I will fix them soon.
+~~Some entities are now broken since 2025.01. I will fix them soon.~~
 
-Until then, only fix is to downgrade.
+~~Until then, only fix is to downgrade.~~
+
+2025.1.1 reverts those changes so things are back to working, but might break again in 2025.3. I'm still planning on landing fixes ssoon.
 
 # Credit
 
