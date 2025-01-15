@@ -18,6 +18,7 @@ from homeassistant.components.cover import (
     STATE_CLOSING,
     STATE_CLOSED,
 )
+from homeassistant.util import slugify
 from homeassistant.const import CONF_NAME, CONF_TYPE
 from .const import (
     HUB,
@@ -35,7 +36,7 @@ PLATFORM_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_NAME): cv.string,
         vol.Required(CONF_TYPE): cv.string,
-        vol.Required(CONF_POS_JOIN): cv.positive_int,           
+        vol.Required(CONF_POS_JOIN): cv.positive_int,
         vol.Required(CONF_IS_OPENING_JOIN): cv.positive_int,
         vol.Required(CONF_IS_CLOSING_JOIN): cv.positive_int,
         vol.Required(CONF_IS_CLOSED_JOIN): cv.positive_int,
@@ -65,7 +66,8 @@ class CrestronShade(CoverEntity):
         self._is_closed_join = config.get(CONF_IS_CLOSED_JOIN)
         self._stop_join = config.get(CONF_STOP_JOIN)
         self._pos_join = config.get(CONF_POS_JOIN)
-        self._unique_id =  f"{self._hub}_cover_{self._name}"
+
+        self._unique_id = slugify(f"{DOMAIN}_cover_{self._name}")
 
     async def async_added_to_hass(self):
         self._hub.register_callback(self.process_callback)
