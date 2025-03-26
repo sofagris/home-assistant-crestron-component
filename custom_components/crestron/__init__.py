@@ -11,7 +11,7 @@ from homeassistant.helpers.event import TrackTemplate, async_track_template_resu
 from homeassistant.helpers.template import Template
 from homeassistant.helpers.script import Script
 from homeassistant.core import callback, Context
-from homeassistant.const import EVENT_HOMEASSISTANT_STOP
+# from homeassistant.const import EVENT_HOMEASSISTANT_STOP
 from homeassistant.const import (
     EVENT_HOMEASSISTANT_STOP,
     CONF_VALUE_TEMPLATE,

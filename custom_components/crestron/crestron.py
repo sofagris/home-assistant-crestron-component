@@ -4,6 +4,7 @@ import logging
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class CrestronXsig:
     def __init__(self):
         """ Initialize CrestronXsig object """
@@ -97,8 +98,7 @@ class CrestronXsig:
                             await callback(f"a{join}", str(value))
                     # Serial Join
                     elif (
-                        data[0] & 0b11111000 == 0b11001000
-                        and data[1] & 0b10000000 == 0b00000000
+                        data[0] & 0b11111000 == 0b11001000 and data[1] & 0b10000000 == 0b00000000
                     ):
                         data += await reader.readuntil(b"\xff")
                         header = struct.unpack("BB", data[:2])
