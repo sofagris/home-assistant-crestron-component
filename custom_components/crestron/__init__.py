@@ -77,7 +77,8 @@ SET_SERIAL_SCHEME = vol.Schema(
     }
 )
 
-PLATFORMS = [
+# Grunnleggende plattformer som alltid skal lastes
+BASE_PLATFORMS = [
     "binary_sensor",
     "sensor",
     "switch",
@@ -85,7 +86,6 @@ PLATFORMS = [
     "cover",
     "media_player",
 ]
-
 
 async def async_setup(hass, config):
     """Set up the crestron component."""
@@ -97,11 +97,14 @@ async def async_setup(hass, config):
             await hub.start()
             hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, hub.stop)
 
+            # Opprett en kopi av BASE_PLATFORMS som vi kan modifisere
+            platforms = BASE_PLATFORMS.copy()
+
             # Legg til climate-plattformen kun hvis den er konfigurert
             if "climate" in config:
-                PLATFORMS.append("climate")
+                platforms.append("climate")
 
-            for platform in PLATFORMS:
+            for platform in platforms:
                 hass.async_create_task(
                     async_load_platform(hass, platform, DOMAIN, {}, config)
                 )
