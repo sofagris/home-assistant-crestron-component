@@ -1,6 +1,5 @@
 """The Crestron Integration Component"""
 
-import asyncio
 import logging
 
 import voluptuous as vol
@@ -11,7 +10,6 @@ from homeassistant.helpers.event import TrackTemplate, async_track_template_resu
 from homeassistant.helpers.template import Template
 from homeassistant.helpers.script import Script
 from homeassistant.core import callback, Context
-# from homeassistant.const import EVENT_HOMEASSISTANT_STOP
 from homeassistant.const import (
     EVENT_HOMEASSISTANT_STOP,
     CONF_VALUE_TEMPLATE,
@@ -25,7 +23,7 @@ from homeassistant.const import (
 
 from .crestron import CrestronXsig
 from .const import CONF_PORT, HUB, DOMAIN, CONF_JOIN, CONF_SCRIPT, CONF_TO_HUB, CONF_FROM_HUB, CONF_VALUE_JOIN, CONF_SET_DIGITAL, CONF_SET_ANALOG, CONF_SET_SERIAL
-#from .control_surface_sync import ControlSurfaceSync
+# from .control_surface_sync import ControlSurfaceSync
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -107,6 +105,7 @@ async def async_setup(hass, config):
     except Exception as err:
         _LOGGER.error("Error setting up Crestron integration: %s", err)
         return False
+
 
 class CrestronHub:
     """Wrapper for the CrestronXsig library."""

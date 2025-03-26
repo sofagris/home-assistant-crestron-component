@@ -23,7 +23,7 @@ class CrestronXsig:
         self._server = server
         addr = server.sockets[0].getsockname()
         _LOGGER.info(f"Listening on {addr}:{port}")
-        await server.serve_forever()
+        asyncio.create_task(server.serve_forever())
 
     async def stop(self):
         """ Stop TCP XSIG server """
