@@ -91,30 +91,36 @@ PLATFORMS = [
 
 
 async def async_setup(hass, config):
-    """Set up a the crestron component."""
+    """Set up the crestron component."""
+    try:
+        if config.get(DOMAIN) is not None:
+            hass.data[DOMAIN] = {}
+            hub = CrestronHub(hass, config[DOMAIN])
 
-    if config.get(DOMAIN) is not None:
-        hass.data[DOMAIN] = {}
-        hub = CrestronHub(hass, config[DOMAIN])
+            await hub.start()
+            hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, hub.stop)
 
-        await hub.start()
-        hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, hub.stop)
+            for platform in PLATFORMS:
+                await async_load_platform(hass, platform, DOMAIN, {}, config)
 
-        for platform in PLATFORMS:
-            async_load_platform(hass, platform, DOMAIN, {}, config)
-
-    return True
+        return True
+    except Exception as err:
+        _LOGGER.error("Error setting up Crestron integration: %s", err)
+        return False
 
 class CrestronHub:
-    ''' Wrapper for the CrestronXsig library '''
+    """Wrapper for the CrestronXsig library."""
     def __init__(self, hass, config):
         self.hass = hass
         self.hub = hass.data[DOMAIN][HUB] = CrestronXsig()
         self.port = config.get(CONF_PORT)
         self.context = Context()
         self.to_hub = {}
-        self.hub.register_sync_all_joins_callback(self.sync_joins_to_hub)
+        self.from_hub = []
+        self.tracker = None
+        
         if CONF_TO_HUB in config:
+            self.hub.register_sync_all_joins_callback(self.sync_joins_to_hub)
             track_templates = []
             for entity in config[CONF_TO_HUB]:
                 template_string = None
@@ -138,9 +144,11 @@ class CrestronHub:
                     template = Template(template_string, hass)
                     self.to_hub[entity[CONF_JOIN]] = template
                     track_templates.append(TrackTemplate(template, None))
-            self.tracker = async_track_template_result(
-                self.hass, track_templates, self.template_change_callback
-            )
+            if track_templates:
+                self.tracker = async_track_template_result(
+                    self.hass, track_templates, self.template_change_callback
+                )
+        
         if CONF_FROM_HUB in config:
             self.from_hub = config[CONF_FROM_HUB]
             self.hub.register_callback(self.join_change_callback)
