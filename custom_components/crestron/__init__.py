@@ -77,7 +77,8 @@ SET_SERIAL_SCHEME = vol.Schema(
     }
 )
 
-# Grunnleggende plattformer som alltid skal lastes
+# Basic platforms that always load
+# Not sure why climate fails if it's in the list and not in the config
 BASE_PLATFORMS = [
     "binary_sensor",
     "sensor",
@@ -97,17 +98,12 @@ async def async_setup(hass, config):
             await hub.start()
             hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, hub.stop)
 
-            # Opprett en kopi av BASE_PLATFORMS som vi kan modifisere
-            platforms = BASE_PLATFORMS.copy()
-
-            # Legg til climate-plattformen kun hvis den er konfigurert
-            if "climate" in config:
-                platforms.append("climate")
-
-            for platform in platforms:
-                hass.async_create_task(
-                    async_load_platform(hass, platform, DOMAIN, {}, config)
-                )
+            # Load only platforms that are configured in config
+            for platform in ["binary_sensor", "sensor", "switch", "light", "cover", "media_player", "climate"]:
+                if platform in config:
+                    hass.async_create_task(
+                        async_load_platform(hass, platform, DOMAIN, {}, config)
+                    )
 
             return True
     except Exception as err:
