@@ -8,11 +8,8 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.event import call_later
 from homeassistant.components.cover import (
     CoverEntity,
-    DEVICE_CLASS_SHADE,
-    SUPPORT_OPEN,
-    SUPPORT_CLOSE,
-    SUPPORT_SET_POSITION,
-    SUPPORT_STOP,
+    CoverDeviceClass,
+    CoverEntityFeature,
     STATE_OPENING,
     STATE_OPEN,
     STATE_CLOSING,
@@ -54,9 +51,12 @@ class CrestronShade(CoverEntity):
     def __init__(self, hub, config):
         self._hub = hub
         if config.get(CONF_TYPE) == "shade":
-            self._device_class = DEVICE_CLASS_SHADE
+            self._device_class = CoverDeviceClass.SHADE
             self._supported_features = (
-                SUPPORT_OPEN | SUPPORT_CLOSE | SUPPORT_SET_POSITION | SUPPORT_STOP
+                CoverEntityFeature.OPEN
+                | CoverEntityFeature.CLOSE
+                | CoverEntityFeature.SET_POSITION
+                | CoverEntityFeature.STOP
             )
         self._should_poll = False
 

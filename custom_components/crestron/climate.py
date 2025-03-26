@@ -6,8 +6,7 @@ import logging
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components.climate import ClimateEntity
 from homeassistant.components.climate.const import (
-    SUPPORT_FAN_MODE,
-    SUPPORT_TARGET_TEMPERATURE_RANGE,
+    ClimateEntityFeature,
     HVAC_MODE_OFF,
     HVAC_MODE_HEAT,
     HVAC_MODE_COOL,
@@ -80,7 +79,7 @@ class CrestronThermostat(ClimateEntity):
             HVAC_MODE_OFF,
         ]
         self._fan_modes = [FAN_ON, FAN_AUTO]
-        self._supported_features = SUPPORT_FAN_MODE | SUPPORT_TARGET_TEMPERATURE_RANGE
+        self._supported_features = ClimateEntityFeature.FAN_MODE | ClimateEntityFeature.TARGET_TEMPERATURE_RANGE
         self._should_poll = False
         self._temperature_unit = unit
 

@@ -7,12 +7,7 @@ from homeassistant.util import slugify
 
 from homeassistant.components.media_player import (
     MediaPlayerEntity,
-    SUPPORT_SELECT_SOURCE,
-    SUPPORT_TURN_OFF,
-    SUPPORT_TURN_ON,
-    SUPPORT_VOLUME_MUTE,
-    SUPPORT_VOLUME_SET,
-    SUPPORT_VOLUME_STEP,
+    MediaPlayerEntityFeature,
 )
 from homeassistant.const import STATE_ON, STATE_OFF, CONF_NAME
 from .const import (
@@ -28,7 +23,7 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-SOURCES_SCHEMA = vol.Schema (
+SOURCES_SCHEMA = vol.Schema(
     {
         cv.positive_int: cv.string,
     }
@@ -59,19 +54,19 @@ class CrestronRoom(MediaPlayerEntity):
         self._name = config.get(CONF_NAME)
         self._device_class = "speaker"
         self._supported_features = (
-            SUPPORT_SELECT_SOURCE
-            | SUPPORT_VOLUME_MUTE
-            | SUPPORT_VOLUME_SET
-            | SUPPORT_TURN_OFF
-            | SUPPORT_TURN_ON
-            | SUPPORT_VOLUME_STEP
+            MediaPlayerEntityFeature.SELECT_SOURCE
+            | MediaPlayerEntityFeature.VOLUME_MUTE
+            | MediaPlayerEntityFeature.VOLUME_SET
+            | MediaPlayerEntityFeature.TURN_OFF
+            | MediaPlayerEntityFeature.TURN_ON
+            | MediaPlayerEntityFeature.VOLUME_STEP
         )
         self._mute_join = config.get(CONF_MUTE_JOIN)
         self._volume_up_join = config.get(CONF_VOLUME_UP_JOIN)
         self._volume_down_join = config.get(CONF_VOLUME_DOWN_JOIN)
         self._volume_join = config.get(CONF_VOLUME_JOIN)
         self._source_number_join = config.get(CONF_SOURCE_NUM_JOIN)
-        self._sources = config.get(CONF_SOURCES)
+        self._sources = config.get(CONF_SOURCES, {})
         self._unique_id = slugify(f"{DOMAIN}_media_player_{self._name}")
 
     async def async_added_to_hass(self):
