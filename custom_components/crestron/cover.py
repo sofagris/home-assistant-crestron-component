@@ -1,6 +1,5 @@
 """Platform for Crestron Shades integration."""
 
-import asyncio
 import logging
 import voluptuous as vol
 
@@ -10,10 +9,6 @@ from homeassistant.components.cover import (
     CoverEntity,
     CoverDeviceClass,
     CoverEntityFeature,
-    STATE_OPENING,
-    STATE_OPEN,
-    STATE_CLOSING,
-    STATE_CLOSED,
 )
 from homeassistant.util import slugify
 from homeassistant.const import CONF_NAME, CONF_TYPE
@@ -50,6 +45,9 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 class CrestronShade(CoverEntity):
     def __init__(self, hub, config):
         self._hub = hub
+        self._device_class = None
+        self._supported_features = 0
+        
         if config.get(CONF_TYPE) == "shade":
             self._device_class = CoverDeviceClass.SHADE
             self._supported_features = (

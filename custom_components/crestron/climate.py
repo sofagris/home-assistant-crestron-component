@@ -7,6 +7,9 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.components.climate import ClimateEntity
 from homeassistant.components.climate.const import (
     ClimateEntityFeature,
+)
+from homeassistant.const import (
+    CONF_NAME,
     HVAC_MODE_OFF,
     HVAC_MODE_HEAT,
     HVAC_MODE_COOL,
@@ -19,7 +22,6 @@ from homeassistant.components.climate.const import (
     FAN_AUTO,
 )
 from homeassistant.util import slugify
-from homeassistant.const import CONF_NAME
 
 from .const import (
     HUB,
@@ -62,6 +64,7 @@ PLATFORM_SCHEMA = vol.Schema(
     },
     extra=vol.ALLOW_EXTRA,
 )
+
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     hub = hass.data[DOMAIN][HUB]
