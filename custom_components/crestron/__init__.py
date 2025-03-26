@@ -82,7 +82,6 @@ PLATFORMS = [
     "sensor",
     "switch",
     "light",
-    "climate",
     "cover",
     "media_player",
 ]
@@ -98,10 +97,16 @@ async def async_setup(hass, config):
             await hub.start()
             hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, hub.stop)
 
-            for platform in PLATFORMS:
-                await async_load_platform(hass, platform, DOMAIN, {}, config)
+            # Legg til climate-plattformen kun hvis den er konfigurert
+            if "climate" in config:
+                PLATFORMS.append("climate")
 
-        return True
+            for platform in PLATFORMS:
+                hass.async_create_task(
+                    async_load_platform(hass, platform, DOMAIN, {}, config)
+                )
+
+            return True
     except Exception as err:
         _LOGGER.error("Error setting up Crestron integration: %s", err)
         return False
