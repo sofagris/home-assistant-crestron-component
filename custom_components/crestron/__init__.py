@@ -5,7 +5,6 @@ import logging
 import voluptuous as vol
 
 import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.discovery import async_load_platform
 from homeassistant.helpers.event import TrackTemplate, async_track_template_result
 from homeassistant.helpers.template import Template
 from homeassistant.helpers.script import Script
@@ -23,7 +22,6 @@ from homeassistant.const import (
 
 from .crestron import CrestronXsig
 from .const import CONF_PORT, HUB, DOMAIN, CONF_JOIN, CONF_SCRIPT, CONF_TO_HUB, CONF_FROM_HUB, CONF_VALUE_JOIN, CONF_SET_DIGITAL, CONF_SET_ANALOG, CONF_SET_SERIAL
-# from .control_surface_sync import ControlSurfaceSync
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -77,17 +75,6 @@ SET_SERIAL_SCHEME = vol.Schema(
     }
 )
 
-# Basic platforms that always load
-# Not sure why climate fails if it's in the list and not in the config
-BASE_PLATFORMS = [
-    "binary_sensor",
-    "sensor",
-    "switch",
-    "light",
-    "cover",
-    "media_player",
-]
-
 async def async_setup(hass, config):
     """Set up the crestron component."""
     try:
@@ -100,6 +87,16 @@ async def async_setup(hass, config):
             _LOGGER.debug("Starting Crestron hub")
             await hub.start()
             hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, hub.stop)
+
+            # Last plattformer som er konfigurert
+            for platform in ["binary_sensor", "sensor", "switch", "light", "cover", "media_player"]:
+                if platform in config:
+                    _LOGGER.debug(f"Loading platform: {platform}")
+                    hass.async_create_task(
+                        hass.helpers.discovery.async_load_platform(
+                            platform, DOMAIN, {}, config
+                        )
+                    )
 
             return True
         else:
