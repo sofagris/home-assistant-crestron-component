@@ -200,14 +200,29 @@ class CrestronHub:
         )
 
     async def start(self):
-        await self.hub.listen(self.port)
+        """Start the Crestron hub."""
+        print("Starting Crestron hub")  # Basic print for debugging
+        _LOGGER.critical("Starting Crestron hub")  # Critical level to ensure it shows up
+        try:
+            _LOGGER.info(f"Attempting to start server on port {self.port}")
+            await self.hub.listen(self.port)
+            _LOGGER.info("Server started successfully")
+        except Exception as e:
+            _LOGGER.error(f"Failed to start server: {e}", exc_info=True)
+            raise
 
     async def stop(self, event):
-        """ remove callback(s) and template trackers """
-        self.hub.remove_callback(self.join_change_callback)
-        if hasattr(self, 'tracker'):
-            self.tracker.async_remove()
-        await self.hub.stop()
+        """Remove callback(s) and template trackers."""
+        print("Stopping Crestron hub")  # Basic print for debugging
+        _LOGGER.critical("Stopping Crestron hub")  # Critical level to ensure it shows up
+        try:
+            self.hub.remove_callback(self.join_change_callback)
+            if hasattr(self, 'tracker'):
+                self.tracker.async_remove()
+            await self.hub.stop()
+            _LOGGER.info("Crestron hub stopped successfully")
+        except Exception as e:
+            _LOGGER.error(f"Error stopping hub: {e}", exc_info=True)
 
     async def join_change_callback(self, cbtype, value):
         """ Call service for tracked join change (from_hub)"""

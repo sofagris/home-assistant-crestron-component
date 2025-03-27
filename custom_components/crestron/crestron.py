@@ -16,33 +16,33 @@ class CrestronXsig:
         self._server = None
         self._available = False
         self._sync_all_joins_callback = None
-        _LOGGER.info("CrestronXsig initialized")
+        _LOGGER.critical("CrestronXsig initialized")
 
     async def listen(self, port):
         """ Start TCP XSIG server listening on configured port """
         try:
-            _LOGGER.info(f"Starting server on port {port}")
+            _LOGGER.critical(f"Starting server on port {port}")
             server = await asyncio.start_server(self.handle_connection, "0.0.0.0", port)
             self._server = server
             addr = server.sockets[0].getsockname()
-            _LOGGER.info(f"Server started successfully, listening on {addr}:{port}")
+            _LOGGER.critical(f"Server started successfully, listening on {addr}:{port}")
             asyncio.create_task(server.serve_forever())
         except Exception as e:
-            _LOGGER.error(f"Failed to start server: {e}", exc_info=True)
+            _LOGGER.critical(f"Failed to start server: {e}", exc_info=True)
             raise
 
     async def stop(self):
         """ Stop TCP XSIG server """
         try:
-            _LOGGER.info("Stopping server...")
+            _LOGGER.critical("Stopping server...")
             self._available = False
             for callback in self._callbacks:
                 await callback("available", "False")
-            _LOGGER.info("Closing server connection")
+            _LOGGER.critical("Closing server connection")
             self._server.close()
-            _LOGGER.info("Server stopped successfully")
+            _LOGGER.critical("Server stopped successfully")
         except Exception as e:
-            _LOGGER.error(f"Error stopping server: {e}", exc_info=True)
+            _LOGGER.critical(f"Error stopping server: {e}", exc_info=True)
 
     def register_sync_all_joins_callback(self, callback):
         """ Allow callback to be registred for when control system requests an update to all joins """
@@ -62,12 +62,12 @@ class CrestronXsig:
         try:
             self._writer = writer
             peer = writer.get_extra_info("peername")
-            _LOGGER.info(f"New connection from {peer}")
+            _LOGGER.critical(f"New connection from {peer}")
             self._available = True
             for callback in self._callbacks:
                 await callback("available", "True")
 
-            _LOGGER.info("Sending update request to control system")
+            _LOGGER.critical("Sending update request to control system")
             writer.write(b"\xfd")
             connected = True
             while connected:
@@ -75,9 +75,9 @@ class CrestronXsig:
                 if data:
                     # Sync all joins request
                     if data[0] == 0xFB:
-                        _LOGGER.info("Received update all joins request")
+                        _LOGGER.critical("Received update all joins request")
                         if self._sync_all_joins_callback is not None:
-                            _LOGGER.info("Executing sync-all-joins callback")
+                            _LOGGER.critical("Executing sync-all-joins callback")
                             await self._sync_all_joins_callback()
                     else:
                         data += await reader.read(1)
@@ -90,7 +90,7 @@ class CrestronXsig:
                             join = ((header[0] & 0b00011111) << 7 | header[1]) + 1
                             value = ~header[0] >> 5 & 0b1
                             self._digital[join] = True if value == 1 else False
-                            _LOGGER.info(f"Received Digital Join: {join} = {value}")
+                            _LOGGER.critical(f"Received Digital Join: {join} = {value}")
                             for callback in self._callbacks:
                                 await callback(f"d{join}", str(value))
                         # Analog Join
@@ -105,7 +105,7 @@ class CrestronXsig:
                                 (header[0] & 0b00110000) << 10 | header[2] << 7 | header[3]
                             )
                             self._analog[join] = value
-                            _LOGGER.info(f"Received Analog Join: {join} = {value}")
+                            _LOGGER.critical(f"Received Analog Join: {join} = {value}")
                             for callback in self._callbacks:
                                 await callback(f"a{join}", str(value))
                         # Serial Join
@@ -120,7 +120,7 @@ class CrestronXsig:
                             data = await reader.read(length)
                             value = data.decode("ascii")
                             self._serial[join] = value
-                            _LOGGER.info(f"Received Serial Join: {join} = {value}")
+                            _LOGGER.critical(f"Received Serial Join: {join} = {value}")
                             for callback in self._callbacks:
                                 await callback(f"s{join}", value)
                 else:
