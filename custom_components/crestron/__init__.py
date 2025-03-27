@@ -292,23 +292,39 @@ class CrestronHub:
         """Sync all joins to hub"""
         try:
             for join in self.to_hub:
-                result = self.to_hub[join]
-                if result is None or result == "unknown":
-                    _LOGGER.warning(f"Skipping sync for join {join} with value {result}")
-                    continue
-
+                template = self.to_hub[join]
                 try:
+                    # Evaluate the template
+                    result = template.async_render()
+                    if result is None or result == "unknown":
+                        _LOGGER.warning(f"Skipping sync for join {join} with value {result}")
+                        continue
+
                     if join.startswith("d"):
-                        _LOGGER.debug(f"sync_joins_to_hub setting digital join {int(join[1:])} to {int(result)}")
-                        self.hub.set_digital(int(join[1:]), int(result))
+                        # Handle digital joins
+                        value = None
+                        if result == STATE_ON or result == "True" or result is True:
+                            value = True
+                        elif result == STATE_OFF or result == "False" or result is False:
+                            value = False
+                        if value is not None:
+                            _LOGGER.debug(f"sync_joins_to_hub setting digital join {int(join[1:])} to {value}")
+                            self.hub.set_digital(int(join[1:]), value)
                     elif join.startswith("a"):
-                        _LOGGER.debug(f"sync_joins_to_hub setting analog join {int(join[1:])} to {int(result)}")
-                        self.hub.set_analog(int(join[1:]), int(result))
+                        # Handle analog joins
+                        try:
+                            value = int(result)
+                            _LOGGER.debug(f"sync_joins_to_hub setting analog join {int(join[1:])} to {value}")
+                            self.hub.set_analog(int(join[1:]), value)
+                        except (ValueError, TypeError) as e:
+                            _LOGGER.error(f"Invalid analog value for join {join}: {result}")
                     elif join.startswith("s"):
-                        _LOGGER.debug(f"sync_joins_to_hub setting serial join {int(join[1:])} to {result}")
-                        self.hub.set_serial(int(join[1:]), result)
-                except ValueError as e:
-                    _LOGGER.error(f"Error syncing join {join}: {e}")
+                        # Handle serial joins
+                        value = str(result)
+                        _LOGGER.debug(f"sync_joins_to_hub setting serial join {int(join[1:])} to {value}")
+                        self.hub.set_serial(int(join[1:]), value)
+                except Exception as e:
+                    _LOGGER.error(f"Error processing join {join}: {e}")
                     continue
 
         except Exception as e:
