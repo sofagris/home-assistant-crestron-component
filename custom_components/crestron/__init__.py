@@ -78,6 +78,8 @@ SET_SERIAL_SCHEME = vol.Schema(
 
 async def async_setup(hass, config):
     """Set up the crestron component."""
+    print("Crestron setup started")  # Basic print for debugging
+    _LOGGER.critical("Crestron setup started")  # Critical level to ensure it shows up
     try:
         _LOGGER.info("Starting Crestron integration setup")
         if config.get(DOMAIN) is not None:
@@ -111,15 +113,19 @@ async def async_setup(hass, config):
 class CrestronHub:
     """Wrapper for the CrestronXsig library."""
     def __init__(self, hass, config):
+        print("CrestronHub init started")  # Basic print for debugging
+        _LOGGER.critical("CrestronHub init started")  # Critical level to ensure it shows up
         self.hass = hass
         self.hub = hass.data[DOMAIN][HUB] = CrestronXsig()
         self.port = config.get(CONF_PORT)
+        _LOGGER.info(f"CrestronHub initialized with port {self.port}")
         self.context = Context()
         self.to_hub = {}
         self.from_hub = []
         self.tracker = None
         
         if CONF_TO_HUB in config:
+            _LOGGER.info("Configuring to_hub")
             self.hub.register_sync_all_joins_callback(self.sync_joins_to_hub)
             track_templates = []
             for entity in config[CONF_TO_HUB]:
@@ -150,6 +156,7 @@ class CrestronHub:
                 )
         
         if CONF_FROM_HUB in config:
+            _LOGGER.info("Configuring from_hub")
             self.from_hub = config[CONF_FROM_HUB]
             self.hub.register_callback(self.join_change_callback)
 
