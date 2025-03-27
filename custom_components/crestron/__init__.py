@@ -101,16 +101,6 @@ async def async_setup(hass, config):
             await hub.start()
             hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, hub.stop)
 
-            # Last kun plattformer som er konfigurert i config
-            platforms = ["binary_sensor", "sensor", "switch", "light", "cover", "media_player"]
-            for platform in platforms:
-                if platform in config:
-                    _LOGGER.debug("Loading platform: %s", platform)
-                    try:
-                        await async_load_platform(hass, platform, DOMAIN, {}, config)
-                    except Exception as platform_err:
-                        _LOGGER.error("Error loading platform %s: %s", platform, platform_err)
-
             return True
         else:
             _LOGGER.error("No Crestron configuration found")
