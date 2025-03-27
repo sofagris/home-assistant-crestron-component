@@ -91,23 +91,32 @@ BASE_PLATFORMS = [
 async def async_setup(hass, config):
     """Set up the crestron component."""
     try:
+        _LOGGER.debug("Starting Crestron integration setup")
         if config.get(DOMAIN) is not None:
+            _LOGGER.debug("Crestron configuration found")
             hass.data[DOMAIN] = {}
             hub = CrestronHub(hass, config[DOMAIN])
 
+            _LOGGER.debug("Starting Crestron hub")
             await hub.start()
             hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, hub.stop)
 
-            # Load only platforms that are configured in config
-            for platform in ["binary_sensor", "sensor", "switch", "light", "cover", "media_player", "climate"]:
+            # Last kun plattformer som er konfigurert i config
+            platforms = ["binary_sensor", "sensor", "switch", "light", "cover", "media_player"]
+            for platform in platforms:
                 if platform in config:
-                    hass.async_create_task(
-                        async_load_platform(hass, platform, DOMAIN, {}, config)
-                    )
+                    _LOGGER.debug("Loading platform: %s", platform)
+                    try:
+                        await async_load_platform(hass, platform, DOMAIN, {}, config)
+                    except Exception as platform_err:
+                        _LOGGER.error("Error loading platform %s: %s", platform, platform_err)
 
             return True
+        else:
+            _LOGGER.error("No Crestron configuration found")
+            return False
     except Exception as err:
-        _LOGGER.error("Error setting up Crestron integration: %s", err)
+        _LOGGER.error("Error setting up Crestron integration: %s", err, exc_info=True)
         return False
 
 
