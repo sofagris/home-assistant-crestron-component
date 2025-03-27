@@ -1,0 +1,38 @@
+set_digital:
+  name: Set Digital Join
+  description: Set a digital join value
+  fields:
+    join:
+      name: Join Number
+      description: The digital join number to set
+      example: 1
+    value:
+      name: Value
+      description: The value to set (true/false)
+      example: true
+
+set_analog:
+  name: Set Analog Join
+  description: Set an analog join value
+  fields:
+    join:
+      name: Join Number
+      description: The analog join number to set
+      example: 1
+    value:
+      name: Value
+      description: The value to set
+      example: 50
+
+set_serial:
+  name: Set Serial Join
+  description: Set a serial join value
+  fields:
+    join:
+      name: Join Number
+      description: The serial join number to set
+      example: 1
+    value:
+      name: Value
+      description: The value to set
+      example: "Hello World" 
