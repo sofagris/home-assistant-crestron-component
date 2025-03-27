@@ -5,6 +5,7 @@ import logging
 import voluptuous as vol
 
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.discovery import async_load_platform
 from homeassistant.helpers.event import TrackTemplate, async_track_template_result
 from homeassistant.helpers.template import Template
 from homeassistant.helpers.script import Script
@@ -87,6 +88,15 @@ async def async_setup(hass, config):
             _LOGGER.debug("Starting Crestron hub")
             await hub.start()
             hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, hub.stop)
+
+            # Last plattformer som er konfigurert
+            platforms = ["binary_sensor", "sensor", "switch", "light", "cover", "media_player", "climate"]
+            for platform in platforms:
+                if platform in config:
+                    _LOGGER.debug(f"Loading platform: {platform}")
+                    hass.async_create_task(
+                        async_load_platform(hass, platform, DOMAIN, {}, config)
+                    )
 
             return True
         else:
