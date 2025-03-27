@@ -81,6 +81,7 @@ class CrestronTestClient:
         )
         data += string.encode()
         data += b"\xff"
+        _LOGGER.info(f"Sending serial data: {data.hex()}")
         self.writer.write(data)
         await self.writer.drain()
         _LOGGER.info(f"Sent serial join {join} = {string}")
@@ -104,11 +105,15 @@ class CrestronTestClient:
                     _LOGGER.warning("No data received, disconnecting")
                     break
 
-                _LOGGER.info(f"Received data: {data.hex()}")
+                _LOGGER.info(f"Received raw data: {data.hex()}")
 
                 # Handle different message types
                 if data[0] == 0xFB:
                     _LOGGER.info("Received update request")
+                elif data[0] == 0xC8:  # Serial data
+                    _LOGGER.info("Received serial data header")
+                    data += await self.reader.read(1)
+                    _LOGGER.info(f"Received complete serial packet: {data.hex()}")
                 else:
                     data += await self.reader.read(1)
                     _LOGGER.info(f"Received complete packet: {data.hex()}")

@@ -37,17 +37,19 @@ PLATFORM_SCHEMA = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
+
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     hub = hass.data[DOMAIN][HUB]
     entity = [CrestronShade(hub, config)]
     async_add_entities(entity)
+
 
 class CrestronShade(CoverEntity):
     def __init__(self, hub, config):
         self._hub = hub
         self._device_class = None
         self._supported_features = 0
-        
+
         if config.get(CONF_TYPE) == "shade":
             self._device_class = CoverDeviceClass.SHADE
             self._supported_features = (

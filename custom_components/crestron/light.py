@@ -13,11 +13,12 @@ _LOGGER = logging.getLogger(__name__)
 PLATFORM_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_NAME): cv.string,
-        vol.Required(CONF_BRIGHTNESS_JOIN): cv.positive_int,    
-        vol.Optional(CONF_BRIGHTNESS_DEFAULT, default=128): cv.positive_int,        
+        vol.Required(CONF_BRIGHTNESS_JOIN): cv.positive_int,
+        vol.Optional(CONF_BRIGHTNESS_DEFAULT, default=128): cv.positive_int,
     },
     extra=vol.ALLOW_EXTRA,
 )
+
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     hub = hass.data[DOMAIN][HUB]
