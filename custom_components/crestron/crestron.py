@@ -73,6 +73,7 @@ class CrestronXsig:
             while connected:
                 data = await reader.read(1)
                 if data:
+                    _LOGGER.critical(f"Received raw data: {data.hex()}")
                     # Sync all joins request
                     if data[0] == 0xFB:
                         _LOGGER.critical("Received update all joins request")
@@ -81,6 +82,7 @@ class CrestronXsig:
                             await self._sync_all_joins_callback()
                     else:
                         data += await reader.read(1)
+                        _LOGGER.critical(f"Received complete packet: {data.hex()}")
                         # Digital Join
                         if (
                             data[0] & 0b11000000 == 0b10000000
