@@ -29,7 +29,7 @@ _LOGGER = logging.getLogger(__name__)
 TO_JOINS_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_JOIN): cv.string,
-        vol.Optional(CONF_ENTITY_ID): cv.entity_id,           
+        vol.Optional(CONF_ENTITY_ID): cv.entity_id,
         vol.Optional(CONF_ATTRIBUTE): cv.string,
         vol.Optional(CONF_VALUE_TEMPLATE): cv.template
     }
@@ -75,6 +75,7 @@ SET_SERIAL_SCHEME = vol.Schema(
         vol.Required(CONF_VALUE_JOIN): cv.string
     }
 )
+
 
 async def async_setup(hass, config):
     """Set up the crestron component."""
@@ -123,7 +124,7 @@ class CrestronHub:
         self.to_hub = {}
         self.from_hub = []
         self.tracker = None
-        
+
         if CONF_TO_HUB in config:
             _LOGGER.info("Configuring to_hub")
             self.hub.register_sync_all_joins_callback(self.sync_joins_to_hub)
@@ -154,7 +155,7 @@ class CrestronHub:
                 self.tracker = async_track_template_result(
                     self.hass, track_templates, self.template_change_callback
                 )
-        
+
         if CONF_FROM_HUB in config:
             _LOGGER.info("Configuring from_hub")
             self.from_hub = config[CONF_FROM_HUB]
@@ -288,29 +289,28 @@ class CrestronHub:
                             self.hub.set_serial(int(join[1:]), str(update_result))
 
     async def sync_joins_to_hub(self):
-        _LOGGER.debug("Syncing joins to control system")
-        for join, template in self.to_hub.items():
-            result = template.async_render()
-            # Digital Join
-            if join[:1] == "d":
-                value = None
-                if result == STATE_ON or result == "True" or result is True:
-                    value = True
-                elif result == STATE_OFF or result == "False" or result is False:
-                    value = False
-                if value is not None:
-                    _LOGGER.debug(
-                        f"sync_joins_to_hub setting digital join {int(join[1:])} to {value}"
-                    )
-                    self.hub.set_digital(int(join[1:]), value)
-            # Analog Join
-            if join[:1] == "a":
-                if result != "None" and result is not None:
-                    _LOGGER.debug(f"sync_joins_to_hub setting analog join {int(join[1:])} to {int(result)}")
-                    self.hub.set_analog(int(join[1:]), int(result))
-            # Serial Join
-            if join[:1] == "s":
-                if result != "None" and result is not None:
-                    _LOGGER.debug(f"sync_joins_to_hub setting serial join {int(join[1:])} to {str(result)}")
-                    self.hub.set_serial(int(join[1:]), str(result))
+        """Sync all joins to hub"""
+        try:
+            for join in self.to_hub:
+                result = self.to_hub[join]
+                if result is None or result == "unknown":
+                    _LOGGER.warning(f"Skipping sync for join {join} with value {result}")
+                    continue
 
+                try:
+                    if join.startswith("d"):
+                        _LOGGER.debug(f"sync_joins_to_hub setting digital join {int(join[1:])} to {int(result)}")
+                        self.hub.set_digital(int(join[1:]), int(result))
+                    elif join.startswith("a"):
+                        _LOGGER.debug(f"sync_joins_to_hub setting analog join {int(join[1:])} to {int(result)}")
+                        self.hub.set_analog(int(join[1:]), int(result))
+                    elif join.startswith("s"):
+                        _LOGGER.debug(f"sync_joins_to_hub setting serial join {int(join[1:])} to {result}")
+                        self.hub.set_serial(int(join[1:]), result)
+                except ValueError as e:
+                    _LOGGER.error(f"Error syncing join {join}: {e}")
+                    continue
+
+        except Exception as e:
+            _LOGGER.error(f"Error in sync_joins_to_hub: {e}")
+            raise

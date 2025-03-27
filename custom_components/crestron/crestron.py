@@ -78,8 +78,13 @@ class CrestronXsig:
                     if data[0] == 0xFB:
                         _LOGGER.critical("Received update all joins request")
                         if self._sync_all_joins_callback is not None:
-                            _LOGGER.critical("Executing sync-all-joins callback")
-                            await self._sync_all_joins_callback()
+                            try:
+                                _LOGGER.critical("Executing sync-all-joins callback")
+                                await self._sync_all_joins_callback()
+                            except ValueError as e:
+                                _LOGGER.error(f"Error in sync callback: {e}")
+                                # Continue running even if sync fails
+                                continue
                     else:
                         data += await reader.read(1)
                         _LOGGER.critical(f"Received complete packet: {data.hex()}")
