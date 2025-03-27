@@ -79,21 +79,22 @@ SET_SERIAL_SCHEME = vol.Schema(
 async def async_setup(hass, config):
     """Set up the crestron component."""
     try:
-        _LOGGER.debug("Starting Crestron integration setup")
+        _LOGGER.info("Starting Crestron integration setup")
         if config.get(DOMAIN) is not None:
-            _LOGGER.debug("Crestron configuration found")
+            _LOGGER.info("Crestron configuration found")
             hass.data[DOMAIN] = {}
             hub = CrestronHub(hass, config[DOMAIN])
 
-            _LOGGER.debug("Starting Crestron hub")
+            _LOGGER.info("Starting Crestron hub")
             await hub.start()
+            _LOGGER.info("Crestron hub started successfully")
             hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, hub.stop)
 
             # Last plattformer som er konfigurert
             platforms = ["binary_sensor", "sensor", "switch", "light", "cover", "media_player", "climate"]
             for platform in platforms:
                 if platform in config:
-                    _LOGGER.debug(f"Loading platform: {platform}")
+                    _LOGGER.info(f"Loading platform: {platform}")
                     hass.async_create_task(
                         async_load_platform(hass, platform, DOMAIN, {}, config)
                     )
